@@ -55,6 +55,7 @@ etherpad_nginx_server:
   default: False
   favicon: False
   name: '{{ etherpad_domain }}'
+  filename: "{{ etherpad_nginx_config_filename if (etherpad_nginx_config_filename|d()) else etherpad_domain[0]|d('default') }}" 
 
   location:
 

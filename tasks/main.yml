@@ -2,7 +2,13 @@
 
 - name: Install required Etherpad packages
   apt: pkg={{ item }} state=latest install_recommends=no
-  with_items: [ 'build-essential', 'pkg-config', 'libssl-dev', 'libpq-dev' ]
+  with_items:
+  - build-essential
+  - pkg-config
+  - libssl-dev
+  - libpq-dev
+  - curl
+  - git
 
 - name: Install Abiword if enabled
   apt: pkg=abiword state=latest install_recommends=no
@@ -81,7 +87,7 @@
   notify: [ 'Assemble services.d' ]
 
 - name: Create log directory
-  file: state=directory path=/var/log/{{ etherpad_user }}
+  file: state=directory path=/var/log/etherpad-lite
         owner={{ etherpad_user }} group=adm mode=0755
 
 - name: Configure etherpad-lite system service
@@ -91,12 +97,10 @@
 - name: Install etherpad-lite init script
   template: src=etc/init.d/etherpad-lite.j2 dest=/etc/init.d/etherpad-lite
             owner=root group=root mode=0755
-  register: etherpad_register_init_script
   notify: [ 'Restart etherpad-lite' ]
 
 - name: Enable etherpad-lite service
-  command: insserv etherpad-lite
-  when: etherpad_register_init_script is defined and etherpad_register_init_script.changed
+  service: name=etherpad-lite enabled=yes
 
 - name: Install Etherpad dependencies
   command: bin/installDeps.sh chdir={{ etherpad_home + '/' + etherpad_repository }}
